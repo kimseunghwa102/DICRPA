@@ -1,0 +1,35 @@
+@@copilotGeneratedAction: 'False'
+Scripting.RunPythonScript PythonCode: $'''# PowerAutomate Desktop에서 실행할 Python 코드
+
+def adjust_prompt_length(prompt, max_characters):
+    if len(prompt) > max_characters:
+        return prompt[:max_characters]
+    else:
+        return prompt
+
+
+max_characters = 3500
+original_prompt = \"\"\"%Replaced%\"\"\"  # 여기에 원래의 긴 문자열을 입력합니다.
+
+additional_text = \"<-옆의 긴 문장를 짧고 간결하게 정확히 30자로 요약해주세요 30자를 넘어가면 절때 안됩니다.\"
+adjusted_prompt = adjust_prompt_length(original_prompt, max_characters)
+
+
+formatted_output = adjusted_prompt + additional_text+ \'\"\' + \',\'
+
+print formatted_output
+''' ScriptOutput=> Replaced ScriptError=> ScriptError2
+Web.InvokeWebService.InvokeWebService Url: $'''https://api.openai.com/v1/completions''' Method: Web.Method.Post Accept: $'''application/json''' ContentType: $'''application/json''' CustomHeaders: $'''Authorization: Bearer ''' RequestBody: $'''{
+    \"model\": \"gpt-3.5-turbo-instruct\",
+    \"prompt\": \"%Replaced%
+    \"max_tokens\": 500,
+    \"temperature\": 0
+  }''' ConnectionTimeout: 30 FollowRedirection: True ClearCookies: False FailOnErrorStatus: False EncodeRequestBody: False UserAgent: $'''Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.21) Gecko/20100312 Firefox/3.6''' Encoding: Web.Encoding.AutoDetect AcceptUntrustedCertificates: False ResponseHeaders=> WebServiceResponseHeaders Response=> WebServiceResponse StatusCode=> StatusCode
+Variables.ConvertJsonToCustomObject Json: WebServiceResponse.Trimmed CustomObject=> JsonAsCustomObject
+DISABLE Display.ShowMessageDialog.ShowMessage Message: $'''%JsonAsCustomObject['choices'][0]['text'].Trimmed%
+
+%JsonAsCustomObject['choices'][0]['text']%''' Icon: Display.Icon.None Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed5
+Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: JsonAsCustomObject['choices'][0]['text'].Trimmed Column: $'''E''' Row: LoopIndex + 1
+    ON ERROR WriteToExcelError
+
+    END
