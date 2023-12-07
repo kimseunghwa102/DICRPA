@@ -1,0 +1,18 @@
+Excel.LaunchExcel.LaunchAndOpenUnderExistingProcess Path: $'''C:\\Users\\seukim\\Downloads\\Book1.xlsx''' Visible: True ReadOnly: False Instance=> ExcelInstance2
+Excel.SetActiveWorksheet.ActivateWorksheetByName Instance: ExcelInstance2 Name: $'''Sheet1'''
+Excel.ReadFromExcel.ReadCells Instance: ExcelInstance2 StartColumn: $'''A''' StartRow: 1 EndColumn: $'''E''' EndRow: 6 ReadAsText: False FirstLineIsHeader: False RangeValue=> ExcelData2
+Display.ShowMessageDialog.ShowMessage Message: ExcelData2.RowsCount Icon: Display.Icon.None Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed5
+LOOP LoopIndex FROM 1 TO ExcelData2.RowsCount - 1 STEP 1
+    SET 언어 TO ExcelData2[LoopIndex]['Column2']
+    SET 수학 TO ExcelData2[LoopIndex]['Column3']
+    SET 외국어 TO ExcelData2[LoopIndex]['Column4']
+    Text.ToNumber Text: 언어 Number=> 언어Num
+    Text.ToNumber Text: 수학 Number=> 수학Num
+    Text.ToNumber Text: 외국어 Number=> 외국어Num
+    SET 평균 TO (언어Num + 수학Num + 외국어Num) / 3
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance2 Value: 평균 Column: $'''E''' Row: LoopIndex + 1
+    Excel.SelectCellsFromExcel.SelectCells Instance: ExcelInstance2 StartColumn: $'''E''' StartRow: 2 EndColumn: $'''E''' EndRow: 6
+    MouseAndKeyboard.SendKeys.FocusAndSendKeysByTitleClass Title: $'''Book1.xlsx - Excel''' Class: $'''''' TextToSend: $'''{Alt}({H}){NumPad9}''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+    SET 평균 TO $'''=IF(AVERAGE(A%LoopIndex + 1%:D%LoopIndex + 1%)>=50, \"합격\", \"불합격\")'''
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance2 Value: 평균 Column: $'''F''' Row: LoopIndex + 1
+END
